@@ -1,28 +1,28 @@
-const express = require("express")
-const bodyParser = require("body-parser")
-const cors = require("cors")
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
-const gql = require("graphql-tag")
-const { ApolloServer } = require("@apollo/server")
-const { buildSubgraphSchema } = require("@apollo/subgraph")
-const { expressMiddleware } = require("@apollo/server/express4")
+const gql = require("graphql-tag");
+const { ApolloServer } = require("@apollo/server");
+const { buildSubgraphSchema } = require("@apollo/subgraph");
+const { expressMiddleware } = require("@apollo/server/express4");
 
-const { readFileSync } = require("fs")
-const { join } = require("path")
+const { readFileSync } = require("fs");
+const { join } = require("path");
 
-const resolvers = require("./src/resolvers")
+const { resolvers } = require("./src/resolvers");
 
-const PORT = 8080
-const app = express()
+const PORT = 8080;
+const app = express();
 
-app.use(cors())
-app.use(bodyParser.json())
+app.use(cors());
+app.use(bodyParser.json());
 
 const typeDefs = gql(
-	readFileSync(join(__dirname, "src", "schema.graphql"), {
-		encoding: "utf-8",
-	})
-)
+  readFileSync(join(__dirname, "src", "schema.graphql"), {
+    encoding: "utf-8",
+  })
+);
 
 // const startApolloServer = async () => {
 // 	const server = new ApolloServer({
@@ -34,14 +34,13 @@ const typeDefs = gql(
 // }
 
 const server = new ApolloServer({
-	schema: buildSubgraphSchema({ typeDefs, resolvers }),
-})
+  schema: buildSubgraphSchema({ typeDefs, resolvers }),
+});
 
-await server.start()
+(async function () {
+  await server.start();
 
-app.use("/graphql", expressMiddleware(startApolloServer()))
-app.use("/graphql", expressMiddleware(server))
+  app.use("/graphql", expressMiddleware(server));
 
-app.listen(PORT, () =>
-	console.log(`Server started at http://localhost:${PORT}`)
-)
+  app.listen(PORT, () => console.log(`Server started at http://localhost:${PORT}`));
+})();
